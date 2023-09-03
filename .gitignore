@@ -3,3 +3,11 @@
 *.jl.mem
 /docs/Manifest.toml
 /docs/build/
+*.aux
+*.fdb_latexmk
+*.fls
+*.blg
+*.out
+*.bbl
+*.synctex.gz
+*.log
