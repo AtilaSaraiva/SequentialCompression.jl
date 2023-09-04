@@ -11,3 +11,5 @@
 *.bbl
 *.synctex.gz
 *.log
+paper.pdf
+scratch.jl
