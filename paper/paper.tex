@@ -20,27 +20,14 @@ The results show great performance and the out-of core solution, with great pote
 
 \section{Introduction}
 
-The \LaTeX{} document preparation system is a special version of the
-\TeX; typesetting program where-in a collection of \TeX; commands
-are added to \LaTeX{} to simplify typesetting. Importantly, it allows
-the author to concentrate on the logical structure of the document
-rather than its visual layout.\vskip 6pt
-Moreover, \LaTeX{} provides a consistent and comprehensive document
-preparation interface. There are simple-to-use commands for
-generating a table of contents, lists of figures and/or tables, and indexes.
-\LaTeX{} can automatically number list entries, equations, figures,
-tables, and footnotes, as well as articles, sections, and subsections.
-Using this numbering system, bibliographic citations, page
-references, and cross references to any other numbered entity (e.g.
-article, section, equation, figure, list entry, etc.) become quite simple
-and straightforward. The use of \LaTeX{} document classes allows
-a simple change of class to transform the appearance of your document.\vskip 6pt
-\LaTeX{} is a powerful tool for managing long and complex documents.
-In particular, partial processing enables long documents to
-be produced article by article without losing sequential information.
-The use of document classes allows a simple change of style
-(or style option) to transform the appearance of your document.
+% TODO: add references to papers that describe this need
+It is common in numerical simulations to have to store the state variable, commonly an array, at each or certain iterations of the simulation. This is done for many reasons, such as to be able to restart the simulation from a certain point, to be able to analyze the evolution of the state variable, or to calculate the gradient using the adjoint state method. In this work, we present a package that aims to provide a simple interface to compress arrays that compose the state of a simulation using the ZFP compression algorithm.
 
+This idea of saving the state of a simulation is not new, and it is normally done with sophisticated techniques.
+Specifically for the implementation of the adjoint state method, the forward modeling function state has to be stored and then used at each iteration of the adjoint modeling to calculate the gradient. Since the collection of all the states in time is given by the the space dimension of the grid times the number of time iterations, storing it in memory is prohibitive for large models. There are several techniques
+
+% TODO: cite zfpcompression.jl and zfp paper
+The ZFP algorithm is a lossy and lossless compression algorithm that is able to compress arrays of floating point numbers targeting numerical simulations. The main argument for its creation was that simulations normally have state barely has any size decrease when using lossless compression given the numbers are all floating point with very little room for deduplication techniques commonly employed by this kind of algorithm. However, lossy compression can use thresholding techniques to decrease the size of the array, but it has to be careful not decrease the signal to noise ratio too much lest not reduce the accuracy of the simulation. The ZFP algorithm allows the user to control how much accuracy, throughput or precision is necessary for their specific problem, and is highly parallelizable. Thus, the package described in this paper uses it in the backend, by leveraging the ZfpCompression.jl package.
 
 
 \section{The JuliaCon Article Class}
