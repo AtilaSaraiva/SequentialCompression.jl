@@ -1,21 +1,19 @@
-title: "My JuliaCon proceeding"
+title: "SequentialCompression.jl: Fast out-of-core storage of compressed simulation snapshots"
 keywords:
-  - Julia
-  - Optimization
-  - Game theory
-  - Compiler
+  - Compression
+  - Simulation
+  - Out-of-core
 authors:
-  - name: 1st author
-    orcid: 0000-0003-1361-440X
-    affiliation: 1
-  - name: 2nd author
-    affiliation: 1, 2
-  - name: 3rd author
-    affiliation: 2
+  - name: Átila Saraiva Quintela
+    orcid: 0000-0003-0042-3583
+    affiliation: 1 2
+  - name: Mauricio Sacchi
+    orcid: 0000-0001-6654-6661
+    affiliation: 1 2
 affiliations:
-  - name: University
+  - name: Signal Analysis and Imaging Group (SAIG)
     index: 1
-  - name: National Lab
+  - name: University of Alberta
     index: 2
-date: 24 April 2019
+date: 01 October 2023
 bibliography: ref.bib
