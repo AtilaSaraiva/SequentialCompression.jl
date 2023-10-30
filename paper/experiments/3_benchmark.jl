@@ -1,4 +1,6 @@
 using SequentialCompression
+using ZfpCompression
+using CairoMakie
 using DataFrames
 
 function compressionthroughput(; rate::Int=0, tol::Real=0, precision::Real=0, inmemory::Bool=true)
@@ -51,12 +53,12 @@ function decompressionthroughput2(cp)
     return throughput
 end
 
-function compressionthroughput3()
+function compressionthroughput3(; rate::Int=0, tol::Real=0, precision::Real=0, inmemory::Bool=true)
     dummyData = rand(1000,1000,10)
     cp = Vector{Vector{UInt8}}(undef, 10)
     wtime0 = Base.time()
     for it=1:size(dummyData, 3)
-        cp[it] = zfp_compress(dummyData[:,:,it])
+        cp[it] = zfp_compress(dummyData[:,:,it], rate=rate, tol=tol, precision=precision)
     end
     wtime    = Base.time()-wtime0
 
@@ -77,8 +79,8 @@ function decompressionthroughput3(cp)
 end
 
 function throughputs(; rate::Int=0, tol::Real=0, precision::Real=0, inmemory::Bool=true)
-    comp_throughput, cp = compressionthroughput(rate=rate, tol=tol, precision=precision, inmemory=inmemory)
-    decomp_throughput = decompressionthroughput(cp)
+    comp_throughput, cp = compressionthroughput3(rate=rate, tol=tol, precision=precision, inmemory=inmemory)
+    decomp_throughput = decompressionthroughput3(cp)
     return comp_throughput, decomp_throughput
 end
 
@@ -86,6 +88,29 @@ function rateTest()
     rates = 1:1:64
     df = DataFrame()
     df.rate = rates |> collect
+
+    values = zeros(length(df.rate),2)
+    for (i,rate) in enumerate(rates)
+        values[i,:] .= throughputs(rate=rate)
+    end
+
+    df.compression_inmemory = values[:, 1]
+    df.decompression_inmemory = values[:, 2]
+
+    for (i,rate) in enumerate(rates)
+        values[i,:] .= throughputs(rate=rate, inmemory=false)
+    end
+
+    df.compression_disk = values[:, 1]
+    df.decompression_disk = values[:, 2]
+
+    return df
+end
+
+function tolTest()
+    tol = [ 10.0^(-i) for i=1:10 ]
+    df = DataFrame()
+    df.tol = tol
 
     values = zeros(length(df.rate),2)
     for (i,rate) in enumerate(rates)
