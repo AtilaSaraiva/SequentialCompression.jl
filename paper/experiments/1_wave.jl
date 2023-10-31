@@ -8,6 +8,7 @@ else
     @init_parallel_stencil(Threads, Float64, 2)
 end
 using Printf, Statistics
+using JSON
 
 @parallel function compute_V!(Vx::Data.Array, Vy::Data.Array, P::Data.Array, dt::Data.Number, ρ::Data.Number, dx::Data.Number, dy::Data.Number)
     @inn(Vx) = @inn(Vx) - dt/ρ*@d_xi(P)/dx
@@ -59,6 +60,11 @@ end
     @printf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
 
     save("wavefield.szfp", snapshots)
+
+    param = Dict("dt" => dt, "dx" => dx, "dy" => dy)
+    open("geometry.json", "w") do file
+        JSON.print(file, param)
+    end
 
     return
 end
