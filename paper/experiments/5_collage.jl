@@ -30,7 +30,9 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
 
     it = range(1, nt, length=N)
     axisOptions = (:yreversed => true,
-                   :xaxisposition => :top)
+                   :xaxisposition => :top,
+                   :xminorticksvisible => true,
+                   :yminorticksvisible => true)
 
     for (n, it) in zip(1:N, it)
         vmax = maximum(Aoriginal[Int(it)])
@@ -39,14 +41,25 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
         ax2 = Axis(fig[n,2]; axisOptions...)
         ax3 = Axis(fig[n,3]; axisOptions...)
 
+        time = geometry["dt"] * (it - 1)
+        time = round(time, digits=2)
+
         if n == 1
-            ax1.title = "Original"
-            ax2.title = "tol = $(tol1)"
-            ax3.title = "tol = $(tol2)"
+            ax1.title = "Original, time=$(time)"
+            ax2.title = "tol = $(tol1), time=$(time)"
+            ax3.title = "tol = $(tol2), time=$(time)"
             for ax in (ax1, ax2, ax3)
                 ax.xlabel = "Offset (m)"
             end
+        else
+            for ax in (ax1, ax2, ax3)
+                ax.title = "time=$(time)"
+                hidexdecorations!(ax, ticks=false, minorticks=false, grid=false)
+            end
         end
+
+        hideydecorations!(ax2, ticks=false, grid=false)
+        hideydecorations!(ax3, ticks=false, grid=false)
 
         img1 = image!(ax1, Aoriginal[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
         image!(ax2, Acomp1[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
