@@ -93,6 +93,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     end
 
     display(fig)
+    CairoMakie.save("../figs/collage.png", fig)
 
     return nothing
 end
