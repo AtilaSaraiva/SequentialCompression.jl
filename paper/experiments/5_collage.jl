@@ -5,10 +5,13 @@ using JSON
 
 function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
                  geometry::Dict,
-                 numberOfSnapshots::Int=4;
+                 numberOfSnapshots::Int=3;
                  tol1::Real=0,
                  tol2::Real=0,
-                 inmemory::Bool=true)
+                 inmemory::Bool=true,
+                 boxes::Tuple=())
+
+    @assert length(boxes) == numberOfSnapshots
 
     Acomp1 = SeqCompressor(Float64, size(Aoriginal)[1:2]..., inmemory=false, tol=tol1)
     Acomp2 = SeqCompressor(Float64, size(Aoriginal)[1:2]..., inmemory=false, tol=tol2)
@@ -28,7 +31,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     size_in_pixels = size_in_inches .* dpi
     fig = Figure(backgroundcolor=RGBf(0.98, 0.98, 0.98), resolution=size_in_pixels)
 
-    it = range(1, nt, length=N)
+    it = range(1, 3//4*nt|>round|>Int, length=N)
     axisOptions = (:yreversed => true,
                    :xaxisposition => :top,
                    :xminorticksvisible => true,
@@ -39,6 +42,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
                   )
 
     for (n, it) in zip(1:N, it)
+        it = round(it)
         vmax = maximum(Aoriginal[Int(it)])
         vmin = minimum(Aoriginal[Int(it)])
 
@@ -76,6 +80,18 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
         image!(ax2, Acomp1[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
         image!(ax3, Acomp2[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
 
+        # Insets
+        if boxes[n] != false
+            ax1Inset = Axis(fig[n,1]; axisOptions..., boxes[n]...)
+            ax2Inset = Axis(fig[n,2]; axisOptions..., boxes[n]...)
+            ax3Inset = Axis(fig[n,3]; axisOptions..., boxes[n]...)
+            image!(ax1Inset, Aoriginal[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
+            image!(ax2Inset, Acomp1[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
+            image!(ax3Inset, Acomp2[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
+        end
+        # ax2Inset = Axis(fig[n,2]; axisOptions...)
+        # ax3Inset = Axis(fig[n,3]; axisOptions...)
+
         Colorbar(fig[n,4], img1)
 
         colors = [:cyan, :magenta, :yellow]
@@ -105,4 +121,19 @@ geometry = open("./geometry.json") do file
     JSON.parse(file)
 end
 
-collage(Aoriginal, geometry, tol1=1e-4, tol2=1e-2)
+idx_x(x) = x / geometry["dx"]
+idx_y(y) = y / geometry["dy"]
+
+boxes = (
+            false,
+            Dict(
+                :width=>Relative(0.4),
+                :height=>Relative(0.2),
+                :halign=>0.7,
+                :valign=>0.7,
+                :limits=>(idx_x(20), idx_x(30), idx_y(1), idx_y(10))
+            ),
+            false
+        )
+
+collage(Aoriginal, geometry, tol1=1e-4, tol2=1e-2, boxes=boxes)
