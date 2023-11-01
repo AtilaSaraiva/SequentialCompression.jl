@@ -40,23 +40,30 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     for (n, it) in zip(1:N, it)
         vmax = maximum(Aoriginal[Int(it)])
         vmin = minimum(Aoriginal[Int(it)])
-        ax1 = Axis(fig[n,1]; axisOptions..., ylabel="Depth (m)")
-        ax2 = Axis(fig[n,2]; axisOptions...)
-        ax3 = Axis(fig[n,3]; axisOptions...)
 
         time = geometry["dt"] * (it - 1)
         time = round(time, digits=2)
 
+        ax1 = Axis(fig[n,1]; axisOptions..., ylabel="Depth (m)")
+        ax2 = Axis(fig[n,2]; axisOptions...)
+        ax3 = Axis(fig[n,3]; axisOptions...)
+
+        # This is a hack to get the time label in the bottom right corner
+        for m = 1:3
+            gl = GridLayout(fig[n, m], tellwidth = false, tellheight = false, halign = :right, valign = :bottom)
+            Box(gl[1, 1], color = :bisque, strokecolor = :black, strokewidth = 2)
+            Label(gl[1, 1], "time=$(time)", padding = (10, 10, 10, 10))
+        end
+
         if n == 1
-            ax1.title = "Original, time=$(time)"
-            ax2.title = "tol = $(tol1), time=$(time)"
-            ax3.title = "tol = $(tol2), time=$(time)"
+            ax1.title = "Original"
+            ax2.title = "tol = $(tol1)"
+            ax3.title = "tol = $(tol2)"
             for ax in (ax1, ax2, ax3)
                 ax.xlabel = "Offset (m)"
             end
         else
             for ax in (ax1, ax2, ax3)
-                ax.title = "time=$(time)"
                 hidexdecorations!(ax, ticks=false, minorticks=false, grid=false)
             end
         end
