@@ -104,9 +104,9 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
                    ytickformat = x -> string.(round.(geometry["dy"] .* x, digits=2)),
                    yautolimitmargin=(0,0), xautolimitmargin=(0,0))
 
-        lines!(ax4, Aoriginal[Int(it)][:, nx÷2], 1:ny, color=colors[1], linewidth=3, linestyle=:solid, label="Original")
-        lines!(ax4, Acomp1[Int(it)][:, nx÷2], 1:ny, color=colors[2], linewidth=3, linestyle=:solid, label="tol = $(tol1)")
-        lines!(ax4, Acomp2[Int(it)][:, nx÷2], 1:ny, color=colors[3], linewidth=3, linestyle=:dash, label="tol = $(tol2)")
+        lines!(ax4, Aoriginal[Int(it)][:, nx÷2], 1:ny, color=colors[1], linewidth=2, linestyle=:solid, label="Original")
+        lines!(ax4, Acomp1[Int(it)][:, nx÷2], 1:ny, color=colors[2], linewidth=2, linestyle=:solid, label="tol = $(tol1)")
+        lines!(ax4, Acomp2[Int(it)][:, nx÷2], 1:ny, color=colors[3], linewidth=2, linestyle=:dash, label="tol = $(tol2)")
     end
 
     display(fig)
