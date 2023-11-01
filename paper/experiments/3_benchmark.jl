@@ -147,6 +147,7 @@ function plot(df, title)
     legend = Legend(fig, [[ln1, ln2], [ln3, ln4]], [labels, labels], ["In-memory", "Disk"], framevisible=false)
     fig[1,2] = legend
     display(fig)
+    save("../figs/throughput.pdf", fig)
     return nothing
 end
 
