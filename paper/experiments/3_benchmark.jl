@@ -79,8 +79,8 @@ function decompressionthroughput3(cp)
 end
 
 function throughputs(; rate::Int=0, tol::Real=0, precision::Real=0, inmemory::Bool=true)
-    comp_throughput, cp = compressionthroughput3(rate=rate, tol=tol, precision=precision, inmemory=inmemory)
-    decomp_throughput = decompressionthroughput3(cp)
+    comp_throughput, cp = compressionthroughput(rate=rate, tol=tol, precision=precision, inmemory=inmemory)
+    decomp_throughput = decompressionthroughput(cp)
     return comp_throughput, decomp_throughput
 end
 
@@ -91,7 +91,7 @@ function rateTest()
 
     values = zeros(length(df.rate),2)
     for (i,rate) in enumerate(rates)
-        values[i,:] .= throughputs(rate=rate)
+        values[i,:] .= throughputs(rate=rate, inmemory=true)
     end
 
     df.compression_inmemory = values[:, 1]
@@ -147,7 +147,7 @@ function plot(df, title)
     legend = Legend(fig, [[ln1, ln2], [ln3, ln4]], [labels, labels], ["In-memory", "Disk"], framevisible=false)
     fig[1,2] = legend
     display(fig)
-    save("../figs/throughput.pdf", fig)
+    CairoMakie.save("../figs/throughput.pdf", fig)
     return nothing
 end
 
