@@ -35,6 +35,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
                    :yminorticksvisible => true,
                    :ytickformat => x -> string.(round.(geometry["dy"] .* x, digits=2)),
                    :xtickformat => x -> string.(round.(geometry["dx"] .* x, digits=2)),
+                   :titlesize => 30,
                   )
 
     for (n, it) in zip(1:N, it)
