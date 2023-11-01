@@ -13,7 +13,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     Acomp1 = SeqCompressor(Float64, size(Aoriginal)[1:2]..., inmemory=false, tol=tol1)
     Acomp2 = SeqCompressor(Float64, size(Aoriginal)[1:2]..., inmemory=false, tol=tol2)
 
-    nt = size(Aoriginal)[end]
+    ny, nx, nt = size(Aoriginal)
 
     for it = 1:nt
         append!(Acomp1, Aoriginal[it])
@@ -23,8 +23,8 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     N = numberOfSnapshots
     M = 3
 
-    size_in_inches = (4, 5)
-    dpi = 300
+    size_in_inches = (5, 5)
+    dpi = 600
     size_in_pixels = size_in_inches .* dpi
     fig = Figure(backgroundcolor=RGBf(0.98, 0.98, 0.98), resolution=size_in_pixels)
 
@@ -74,7 +74,22 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
         img1 = image!(ax1, Aoriginal[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
         image!(ax2, Acomp1[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
         image!(ax3, Acomp2[Int(it)]; colorrange=(vmin,vmax), colormap=:seismic)
+
         Colorbar(fig[n,4], img1)
+
+        colors = [:cyan, :magenta, :yellow]
+        lines!(ax1, [nx÷2, nx÷2], [1, ny], color=colors[1], linewidth=1.5, linestyle=:dash)
+        lines!(ax2, [nx÷2, nx÷2], [1, ny], color=colors[2], linewidth=1.5, linestyle=:dash)
+        lines!(ax3, [nx÷2, nx÷2], [1, ny], color=colors[3], linewidth=1.5, linestyle=:dash)
+
+        ax4 = Axis(fig[n,5], ylabel="Depth (m)", xlabel="Amplitude", yreversed = true,
+                   xaxisposition = :top,
+                   ytickformat = x -> string.(round.(geometry["dy"] .* x, digits=2)),
+                   yautolimitmargin=(0,0), xautolimitmargin=(0,0))
+
+        lines!(ax4, Aoriginal[Int(it)][:, nx÷2], 1:ny, color=colors[1], linewidth=3, linestyle=:solid, label="Original")
+        lines!(ax4, Acomp1[Int(it)][:, nx÷2], 1:ny, color=colors[2], linewidth=3, linestyle=:solid, label="tol = $(tol1)")
+        lines!(ax4, Acomp2[Int(it)][:, nx÷2], 1:ny, color=colors[3], linewidth=3, linestyle=:dash, label="tol = $(tol2)")
     end
 
     display(fig)
@@ -88,4 +103,4 @@ geometry = open("./geometry.json") do file
     JSON.parse(file)
 end
 
-collage(Aoriginal, geometry, tol1=1e-2, tol2=1e-4)
+collage(Aoriginal, geometry, tol1=1e-4, tol2=1e-2)
