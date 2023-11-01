@@ -24,7 +24,7 @@ end
 ##################################################
 @views function acoustic2D()
     # Physics
-    lx, ly    = 40.0, 40.0  # domain extends
+    lx, ly    = 50.0, 50.0  # domain extends
     k         = 1.0         # bulk modulus
     ρ         = 1.0         # density
     t         = 0.0         # physical time
@@ -34,6 +34,7 @@ end
     nout      = 10          # plotting frequency
     # Derived numerics
     dx, dy    = lx/(nx-1), ly/(ny-1) # cell sizes
+    dx, dy = map(d->round(d, digits=2), (dx, dy))
     # Array allocations
     P         = @zeros(nx  ,ny  )
     Vx        = @zeros(nx+1,ny  )
