@@ -60,7 +60,7 @@ end
     T_eff    = A_eff/wtime_it                       # Effective memory throughput [GB/s]
     @printf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
 
-    save("wavefield.szfp", snapshots)
+    SequentialCompression.save("wavefield.szfp", snapshots)
 
     param = Dict("dt" => dt, "dx" => dx, "dy" => dy)
     open("geometry.json", "w") do file
