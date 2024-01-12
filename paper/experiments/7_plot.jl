@@ -46,6 +46,8 @@ function plot()
     ax1 = Axis(ga[1,1], ylabel="nthreads", xlabel="rate (bpd)")
 
     hm = heatmap!(ax1, multifileData.rate, multifileData.nthreads, 1000 .* multifileData.wtime_it_minimum)
+    xlims!(ax1, minimum(multifileData.rate), maximum(multifileData.rate))
+    ylims!(ax1, minimum(multifileData.nthreads), maximum(multifileData.nthreads))
     Colorbar(ga[1,2], hm; label = "exec. time per iter. (ms/it)", vertical=true)
     colgap!(ga, 8)
 
@@ -132,6 +134,7 @@ publication_theme() = Theme(
     figure_padding=8,
     Axis=(
         xgridstyle=:dash, ygridstyle=:dash,
+        xminorticksvisible=true,
         ),
     Legend=(framecolor=(:black, 0.5), backgroundcolor=(:white, 0.5), framevisible=false, tellheight=true, tellwidth=false, labelsize=8,
             nbanks=2, orientation=:horizontal),

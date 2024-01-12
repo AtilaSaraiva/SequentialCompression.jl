@@ -191,7 +191,7 @@ end
         end
 
         let inmemory = true
-            for rate = 1:4:64
+            for rate = 4:4:64
                 acoustic2D_compression!(dfCompInmem, inmemory=inmemory, rate=rate)
             end
             for tol = [10.0^k for k=-4:-1:-10]
@@ -203,12 +203,5 @@ end
     CSV.write("dfLimits.csv", dfLimits)
     CSV.write("dfCompMultifile.csv", dfCompMultifile)
     CSV.write("dfCompInmem.csv", dfCompInmem)
-
-    # function nested_plot_rates_multifile(f)
-        # ax = Axis(f[1,1], ylabel="nthreads", xlabel="rate (bpd)", yscale=log)
-        # filteredData = filter(:rate => rate -> rate > 0, dfCompMultifile)
-        # gdf = groupby(filteredData, Cols(:rate, :nthreads, :)
-        # combine(gdf, :rate, :nthreads, :rate =>
-    # end
 
 # end
