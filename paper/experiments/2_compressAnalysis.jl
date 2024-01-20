@@ -36,22 +36,40 @@ end
 sizes_lossless = sizeComp(A -> zfp_compress(A))
 sizes_lossy = sizeComp(A -> zfp_compress(A, tol=1e-5))
 
-labels = ["sizes for each wavefield snapshot", "sizes for random arrays"]
 
-fig = Figure(backgroundcolor = RGBf(0.98, 0.98, 0.98))
-ax1 = Axis(fig[1:2,1],
-          title = "Compressed array size: wavefield vs random arrays",
-          xlabel = "Finite difference iterations",
-          ylabel = "Size of compressed array (Mb)"
-         )
+function plot()
+    cm_to_pt(cm) = cm .* 28.3465
+    size_in_cm = (8.16, 13)
+    size_in_pt = cm_to_pt(size_in_cm)
+    fig = Figure(size=size_in_pt)
+    ax1 = Axis(fig[1,1],
+              xlabel = "Finite difference iterations",
+              ylabel = "Size of compressed array (Mb)"
+             )
 
-ln1 = lines!(ax1, sizes_lossless.wave)
-ln2 = lines!(ax1, sizes_lossless.random)
-ln3 = lines!(ax1, sizes_lossy.wave)
-ln4 = lines!(ax1, sizes_lossy.random)
-legend = Legend(fig, [[ln1, ln2], [ln3, ln4]], [labels, labels], ["Lossless", "Lossy"], framevisible=false)
+    ln1 = lines!(ax1, sizes_lossless.wave)
+    ln2 = lines!(ax1, sizes_lossless.random)
+    ln3 = lines!(ax1, sizes_lossy.wave)
+    ln4 = lines!(ax1, sizes_lossy.random)
 
-fig[1:2,2] = legend
+    group1 = [LineElement(color=ln.color, linestype=ln.linestyle) for ln in (ln1, ln2)]
+    group2 = [LineElement(color=ln.color, linestype=ln.linestyle) for ln in (ln3, ln4)]
+    labels = ["wavefield compressed snapshot size", "random arrays compressed snapshot size"]
+    legend = Legend(fig[2,1], [group1, group2], [labels, labels], ["Lossless", "Lossy"], framevisible=false)
 
-display(fig)
+    return fig
+end
+
+publication_theme = Theme(
+    fontsize=10,
+    font="CMU Serif",
+    figure_padding=8,
+    Axis=(
+        xgridstyle=:dash, ygridstyle=:dash,
+        xminorticksvisible=true,
+        ),
+    Legend=(framecolor=(:black, 0.5), backgroundcolor=(:white, 0.5), framevisible=false, tellheight=true, tellwidth=false, labelsize=8, orientation=:vertical, titlesize=9),
+)
+
+fig = with_theme(plot, publication_theme)
 CairoMakie.save("../figs/compressedSizeAnalysis.pdf", fig)
