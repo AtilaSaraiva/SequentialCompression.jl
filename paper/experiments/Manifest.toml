@@ -1864,7 +1864,9 @@ version = "1.5.0+0"
 
 [[deps.ZfpCompression]]
 deps = ["zfp_jll"]
-git-tree-sha1 = "ab2f8dd3463951e6bd245966f42de4adadd1657a"
+git-tree-sha1 = "6518c972e58a4dd600a45145188d1519a0b5637a"
+repo-rev = "abstractArrays"
+repo-url = "https://github.com/AtilaSaraiva/ZfpCompression.jl"
 uuid = "43441a71-1662-41c6-b8ea-40ed1525242b"
 version = "0.2.3"
 
