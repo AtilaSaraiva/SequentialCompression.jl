@@ -56,10 +56,8 @@ function plot()
     ax2 = Axis(gb[1,1], alignmode=Mixed(right=0), ylabel="time / iter (ms/it)", xlabel="rate (bpd)")
 
     ln1 = lines!(ax2, multifileDataMaxThreads.rate, 1000 .* multifileDataMaxThreads.wtime_it_minimum, label="multifile comp.")
-    band!(ax2, multifileDataMaxThreads.rate, 1000 .* multifileDataMaxThreads.wtime_it_minimum, 1000 .* multifileDataMaxThreads.wtime_it_maximum)
 
     ln2 = lines!(ax2, inmemoryData.rate, 1000 .* inmemoryData.wtime_it_minimum, label="in memory comp.")
-    band!(ax2, inmemoryData.rate, 1000 .* inmemoryData.wtime_it_minimum, 1000 .* inmemoryData.wtime_it_maximum)
 
     let storage = filter(:media => media -> media == "disk", comparissonData),
         memory = filter(:media => media -> media == "memory", comparissonData)
