@@ -23,6 +23,9 @@ end
     return
 end
 
+const NX, NY = 1000, 1000
+const NT = 500
+
 @views function acoustic2D_storage!(df::DataFrame)
     # Physics
     lx, ly    = 50.0, 50.0  # domain extends
@@ -30,8 +33,8 @@ end
     ρ         = 1.0         # density
     t         = 0.0         # physical time
     # Numerics
-    nx, ny    = 1000, 1000    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
-    nt        = 1000        # number of timesteps
+    nx, ny    = NX, NY    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
+    nt        = NT        # number of timesteps
     nout      = 10          # plotting frequency
     # Derived numerics
     dx, dy    = lx/(nx-1), ly/(ny-1) # cell sizes
@@ -74,8 +77,8 @@ end
     ρ         = 1.0         # density
     t         = 0.0         # physical time
     # Numerics
-    nx, ny    = 1000, 1000    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
-    nt        = 1000        # number of timesteps
+    nx, ny    = NX, NY    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
+    nt        = NT        # number of timesteps
     nout      = 10          # plotting frequency
     # Derived numerics
     dx, dy    = lx/(nx-1), ly/(ny-1) # cell sizes
@@ -118,8 +121,8 @@ end
     ρ         = 1.0         # density
     t         = 0.0         # physical time
     # Numerics
-    nx, ny    = 1000, 1000    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
-    nt        = 1000        # number of timesteps
+    nx, ny    = NX, NY    # numerical grid resolution; should be a mulitple of 32-1 for optimal GPU perf
+    nt        = NT        # number of timesteps
     nout      = 10          # plotting frequency
     # Derived numerics
     dx, dy    = lx/(nx-1), ly/(ny-1) # cell sizes
@@ -133,7 +136,7 @@ end
     dt        = min(dx,dy)/sqrt(k/ρ)/4.1
 
     if inmemory
-        snapshots = SeqCompressor(Float64, nx, ny, inmemory=inmemory, tol=tol, precision=precision, rate=rate)
+        snapshots = SeqCompressor(Float64, nx, ny, nt=NT, inmemory=inmemory, tol=tol, precision=precision, rate=rate)
     else
         filepaths = "./seqcomp"
         snapshots = SeqCompressor(Float64, nx, ny, inmemory=inmemory, tol=tol, precision=precision, rate=rate, nthreads=nthreads, filepaths="./seqcomp")
@@ -181,7 +184,7 @@ end
         acoustic2D_memory!(dfLimits)
         let inmemory = false
             for nthreads = range(4, Threads.nthreads(), step=4)
-                for rate = 4:4:64
+                for rate = 4:4:52
                     acoustic2D_compression!(dfCompMultifile, inmemory=inmemory, rate=rate, nthreads=nthreads)
                 end
                 for tol = [10.0^k for k=-4:-1:-10]
@@ -191,7 +194,7 @@ end
         end
 
         let inmemory = true
-            for rate = 4:4:64
+            for rate = 4:4:52
                 acoustic2D_compression!(dfCompInmem, inmemory=inmemory, rate=rate)
             end
             for tol = [10.0^k for k=-4:-1:-10]
