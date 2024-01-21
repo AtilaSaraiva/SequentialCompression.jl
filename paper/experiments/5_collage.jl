@@ -48,7 +48,7 @@ function collage(Aoriginal::SequentialCompression.AbstractCompArraySeq,
     cm_to_pt(cm) = cm .* 28.3465
     size_in_cm = (20, 18)
     size_in_pt = cm_to_pt(size_in_cm)
-    fig = Figure(backgroundcolor=RGBf(0.98, 0.98, 0.98), size=size_in_pt, fontsize=10)
+    fig = Figure(size=size_in_pt, fontsize=10)
 
     it = range(1//4*nt, 1//2*nt|>round|>Int, length=N)
     axisOptions = (:yreversed => true,
