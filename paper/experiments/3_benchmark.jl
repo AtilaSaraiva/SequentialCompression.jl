@@ -3,9 +3,15 @@ using ZfpCompression
 using CairoMakie
 using DataFrames
 
+const N1, N2 = 2000, 2000
+
 function compressionthroughput(; rate::Int=0, tol::Real=0, precision::Int=0, inmemory::Bool=true)
-    dummyData = rand(1000,1000,10)
-    cp = SeqCompressor(Float64, 1000, 1000, rate=rate, tol=tol, precision=precision, inmemory=inmemory)
+    dummyData = rand(N1, N2,10)
+    if inmemory
+        cp = SeqCompressor(Float64, N1, N2, rate=rate, tol=tol, precision=precision, inmemory=inmemory)
+    else
+        cp = SeqCompressor(Float64, N1, N2, rate=rate, tol=tol, precision=precision, inmemory=inmemory, filepaths="./seqcomp")
+    end
 
     wtime0 = Base.time()
     for it=1:size(dummyData, 3)
@@ -19,10 +25,12 @@ end
 
 function decompressionthroughput(cp)
     wtime0 = Base.time()
-    decompData = cp[:]
+    for it=1:size(cp)[3]
+        cp[it]
+    end
     wtime    = Base.time()-wtime0
 
-    throughput = sizeof(decompData) * 1e-6 / wtime
+    throughput = *(size(cp)...)*sizeof(cp.eltype) * 1e-6 / wtime
     return throughput
 end
 
@@ -67,10 +75,10 @@ function compressionthroughput3(; rate::Int=0, tol::Real=0, precision::Int=0, in
 end
 
 function decompressionthroughput3(cp)
+    decompData = zeros(1000,1000)
     wtime0 = Base.time()
-    decompData = zeros(1000,1000,10)
-    for it=1:length(cp)
-        decompData[:,:,it] .= zfp_decompress(cp[it])
+    for it=1:10
+        decompData[:,:] .= zfp_decompress(cp[it])
     end
     wtime    = Base.time()-wtime0
 
@@ -85,123 +93,127 @@ function throughputs(; rate::Int=0, tol::Real=0, precision::Int=0, inmemory::Boo
 end
 
 function rateTest()
-    rates = 1:1:64
-    df = DataFrame()
-    df.rate = rates |> collect
-
-    values = zeros(length(df.rate),2)
-    for (i,rate) in enumerate(rates)
-        values[i,:] .= throughputs(rate=rate, inmemory=true)
-    end
-
-    df.compression_inmemory = values[:, 1]
-    df.decompression_inmemory = values[:, 2]
+    rates = 4:8:52
+    df = DataFrame(rate=Int64[], media=String[], compThroughput=Float64[], decompThroughput=Float64[])
 
     for (i,rate) in enumerate(rates)
-        values[i,:] .= throughputs(rate=rate, inmemory=false)
+        comp_throughput, decomp_throughput = throughputs(rate=rate, inmemory=true)
+        push!(df, (rate, "inmemory", comp_throughput, decomp_throughput))
     end
 
-    df.compression_disk = values[:, 1]
-    df.decompression_disk = values[:, 2]
+    for (i,rate) in enumerate(rates)
+        comp_throughput, decomp_throughput = throughputs(rate=rate, inmemory=false)
+        push!(df, (rate, "disk", comp_throughput, decomp_throughput))
+    end
 
-    return df
+    gdf = groupby(df, Cols(:rate, :media))
+    return combine(gdf, :compThroughput => maximum, :decompThroughput => maximum, renamecols=false)
 end
 
 function precisionTest()
-    precisions = 1:1:64
-    df = DataFrame()
-    df.precision = precisions |> collect
-
-    values = zeros(length(df.precision),2)
-    for (i,precision) in enumerate(precisions)
-        values[i,:] .= throughputs(precision=precision, inmemory=true)
-    end
-
-    df.compression_inmemory = values[:, 1]
-    df.decompression_inmemory = values[:, 2]
+    precisions = 4:8:52
+    df = DataFrame(precision=Int64[], media=String[], compThroughput=Float64[], decompThroughput=Float64[])
 
     for (i,precision) in enumerate(precisions)
-        values[i,:] .= throughputs(precision=precision, inmemory=true)
+        comp_throughput, decomp_throughput = throughputs(precision=precision, inmemory=true)
+        push!(df, (precision, "inmemory", comp_throughput, decomp_throughput))
     end
 
-    df.compression_disk = values[:, 1]
-    df.decompression_disk = values[:, 2]
+    for (i,precision) in enumerate(precisions)
+        comp_throughput, decomp_throughput = throughputs(precision=precision, inmemory=false)
+        push!(df, (precision, "disk", comp_throughput, decomp_throughput))
+    end
 
-    return df
+    gdf = groupby(df, Cols(:precision, :media))
+    return combine(gdf, :compThroughput => maximum, :decompThroughput => maximum, renamecols=false)
 end
 
 function tolTest()
-    tols = [ 10.0^(-i) for i=1:10 ]
-    df = DataFrame()
-    df.tol = tols
-
-    values = zeros(length(df.tol),2)
-    for (i,tol) in enumerate(tols)
-        values[i,:] .= throughputs(tol=tol, inmemory=true)
-    end
-
-    df.compression_inmemory = values[:, 1]
-    df.decompression_inmemory = values[:, 2]
+    tols = [ 10.0^(-i) for i=1:1:10 ]
+    df = DataFrame(tol=Float64[], media=String[], compThroughput=Float64[], decompThroughput=Float64[])
 
     for (i,tol) in enumerate(tols)
-        values[i,:] .= throughputs(tol=tol, inmemory=false)
+        comp_throughput, decomp_throughput = throughputs(tol=tol, inmemory=true)
+        push!(df, (tol, "inmemory", comp_throughput, decomp_throughput))
     end
 
-    df.compression_disk = values[:, 1]
-    df.decompression_disk = values[:, 2]
+    for (i,tol) in enumerate(tols)
+        comp_throughput, decomp_throughput = throughputs(tol=tol, inmemory=false)
+        push!(df, (tol, "disk", comp_throughput, decomp_throughput))
+    end
 
-    return df
+    gdf = groupby(df, Cols(:tol, :media))
+    return combine(gdf, :compThroughput => maximum, :decompThroughput => maximum, renamecols=false)
 end
 
 function plot(df_rate, df_tol, df_precision)
-    fig = Figure()
+    cm_to_pt(cm) = cm .* 28.3465
+    size_in_cm = (18, 15)
+    size_in_pt = cm_to_pt(size_in_cm)
+    fig = Figure(size=size_in_pt)
     ax1 = Axis(fig[1,1],
                xlabel="rate (bps)",
                ylabel="throughput (MiB/s)",
-               title="Throughput x rate",
+               title="throughput x rate",
                xautolimitmargin=(0,0),
-               xticks = (1:4:64)
+               xticks = (4:4:52)
              )
     ax2 = Axis(fig[2,1],
                xlabel="tolerance",
                ylabel="throughput (MiB/s)",
-               title="Throughput x tolerance",
+               title="throughput x tolerance",
                xscale=log10,
                xautolimitmargin=(0,0),
+               xminorticksvisible=false,
+               xreversed=true
              )
     ax3 = Axis(fig[3,1],
                xlabel="precision (bit planes)",
                ylabel="throughput (MiB/s)",
-               title="Throughput x precision",
+               title="throughput x precision",
                xautolimitmargin=(0,0),
-               xticks = (1:4:64)
+               xticks = (4:4:52)
              )
 
-    colors = [:blue, :red, :green, :orange]
-    ln1 = lines!(ax1, df_rate.rate, df_rate.compression_inmemory, color=colors[1])
-    ln2 = lines!(ax1, df_rate.rate, df_rate.decompression_inmemory, color=colors[2])
-    ln3 = lines!(ax1, df_rate.rate, df_rate.compression_disk, color=colors[3])
-    ln4 = lines!(ax1, df_rate.rate, df_rate.decompression_disk, color=colors[4])
 
-    lines!(ax2, df_tol.tol, df_tol.compression_inmemory, color=colors[1])
-    lines!(ax2, df_tol.tol, df_tol.decompression_inmemory, color=colors[2])
-    lines!(ax2, df_tol.tol, df_tol.compression_disk, color=colors[3])
-    lines!(ax2, df_tol.tol, df_tol.decompression_disk, color=colors[4])
+    colors = [:blue, :red, :purple, :orange]
+    for (df, ax, var) in zip((df_rate, df_tol, df_precision), (ax1, ax2, ax3), (:rate, :tol, :precision))
+        let df_inmemory = filter(:media => x -> x=="inmemory", df),
+            df_disk = filter(:media => x -> x=="disk", df),
+            ln1 = lines!(ax, df_inmemory[!,var], df_inmemory.compThroughput, color=colors[1])
+            ln2 = lines!(ax, df_inmemory[!,var], df_inmemory.decompThroughput, color=colors[2])
+            ln3 = lines!(ax, df_disk[!,var], df_disk.compThroughput, color=colors[3])
+            ln4 = lines!(ax, df_disk[!,var], df_disk.decompThroughput, color=colors[4])
+        end
+    end
 
-    lines!(ax3, df_precision.precision, df_precision.compression_inmemory, color=colors[1])
-    lines!(ax3, df_precision.precision, df_precision.decompression_inmemory, color=colors[2])
-    lines!(ax3, df_precision.precision, df_precision.compression_disk, color=colors[3])
-    lines!(ax3, df_precision.precision, df_precision.decompression_disk, color=colors[4])
-
+    group1 = [LineElement(color=color, linestype=nothing) for color in colors[1:2]]
+    group2 = [LineElement(color=color, linestype=nothing) for color in colors[3:4]]
     labels = ["Compression throughput", "Decompression throughput"]
-    legend = Legend(fig, [[ln1, ln2], [ln3, ln4]], [labels, labels], ["In-memory", "Disk"], framevisible=false)
+    legend = Legend(fig, [group1, group2], [labels, labels], ["In-memory", "Disk"], framevisible=false)
     fig[1:3,2] = legend
-    display(fig)
-    CairoMakie.save("../figs/throughput.pdf", fig)
-    return nothing
+
+    colgap!(fig.layout, 10)
+    rowgap!(fig.layout, 10)
+    return fig
 end
+
+publication_theme() = Theme(
+    fontsize=10,
+    font="CMU Serif",
+    figure_padding=8,
+    Axis=(
+        xgridstyle=:dash, ygridstyle=:dash,
+        xminorticksvisible=true,
+        ),
+    Legend=(framecolor=(:black, 0.5), backgroundcolor=(:white, 0.5), framevisible=false, tellheight=true, tellwidth=false, labelsize=8)
+)
 
 precision_df = precisionTest()
 tol_df = tolTest()
 rate_df = rateTest()
-plot(rate_df, tol_df, precision_df)
+fig = with_theme(publication_theme()) do
+    plot(rate_df, tol_df, precision_df)
+end
+
+CairoMakie.save("../figs/throughput.pdf", fig, pt_per_unit=1)
