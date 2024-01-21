@@ -72,4 +72,4 @@ publication_theme = Theme(
 )
 
 fig = with_theme(plot, publication_theme)
-CairoMakie.save("../figs/compressedSizeAnalysis.pdf", fig)
+CairoMakie.save("../figs/compressedSizeAnalysis.pdf", fig, pt_per_unit=1)
