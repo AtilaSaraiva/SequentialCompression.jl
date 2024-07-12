@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/AtilaSaraiva/SequentialCompression.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/AtilaSaraiva/SequentialCompression.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/AtilaSaraiva/SequentialCompression.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/AtilaSaraiva/SequentialCompression.jl)
 
-WARNING: I changed the name of the package to SequentialZfpCompression.jl, which now is being hosted in a another github repo: ![github.com/AtilaSaraiva/SequentialZfpCompression.jl](https://github.com/AtilaSaraiva/SequentialZfpCompression.jl). I only kept this repository intact to not break the link on the JuliaCon 2024 schedule.
+**WARNING:** I changed the name of the package to SequentialZfpCompression.jl, which now is being hosted in a another github repo: ![github.com/AtilaSaraiva/SequentialZfpCompression.jl](https://github.com/AtilaSaraiva/SequentialZfpCompression.jl). I only kept this repository intact to not break the link on the JuliaCon 2024 schedule.
 
 This package aims to provide a nice interface for compression of multiple arrays of the same size in
 sequence. These arrays can be up to 4D. The intended application is to store snapshots of a iterative
